@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AL Tracker 2025</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f0f2f5;color:#1a202c;font-size:14px;line-height:1.5;padding-bottom:60px;-webkit-text-size-adjust:100%}
+.container{max-width:800px;margin:0 auto;padding:12px}
+.header{background:linear-gradient(135deg,#4c51bf,#7c3aed);color:#fff;padding:18px 16px;border-radius:12px;margin-bottom:12px}
+.header h1{font-size:1.2rem}.header .sub{opacity:.8;font-size:.75rem;margin-top:4px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.scard{background:#fff;border-radius:10px;padding:10px 6px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.scard .lb{font-size:.65rem;color:#718096;font-weight:600;text-transform:uppercase}
+.scard .vl{font-size:1.3rem;font-weight:700;margin-top:2px}
+.c-total .vl{color:#4c51bf}.c-used .vl{color:#e53e3e}.c-plan .vl{color:#dd6b20}.c-rem .vl{color:#38a169}
+button{border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:500;transition:background .15s;-webkit-tap-highlight-color:transparent;font-family:inherit}
+.btn-p{background:#4c51bf;color:#fff}.btn-p:active{background:#434190}
+.btn-s{background:#e2e8f0;color:#4a5568}.btn-s:active{background:#cbd5e0}
+.btn-d{background:#fed7d7;color:#c53030}.btn-d:active{background:#feb2b2}
+.btn-g{background:#c6f6d5;color:#276749}.btn-w{background:#fefcbf;color:#975a16}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.filter-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.filter-bar select{padding:6px 8px;border:1px solid #e2e8f0;border-radius:8px;font-size:.8rem;background:#fff;font-family:inherit}
+.card-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.entry-card{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:4px solid #e2e8f0}
+.entry-card.pending{border-left-color:#ed8936}.entry-card.done{border-left-color:#38a169}
+.ec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:8px}
+.ec-holiday{font-weight:700;font-size:.92rem}.ec-date{font-size:.78rem;color:#718096;white-space:nowrap;flex-shrink:0}
+.ec-remarks{font-size:.8rem;color:#4a5568;margin:4px 0;word-break:break-word}
+.ec-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f0}
+.ec-types{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.ec-al-info{font-size:.72rem;color:#718096;margin-left:4px}
+.ec-actions{display:flex;gap:6px;align-items:center}
+.ec-actions button{padding:5px 10px;font-size:.75rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;white-space:nowrap}
+.b-hours{background:#feebc8;color:#c05621}.b-si{background:#e9d8fd;color:#6b46c1}.b-al{background:#bee3f8;color:#2b6cb0}
+.b-sl{background:#e9d8fd;color:#6b46c1}.b-1day{background:#fed7d7;color:#c53030}.b-half{background:#fefcbf;color:#975a16}
+.b-pm{background:#c6f6d5;color:#276749}.b-hr{background:#e2e8f0;color:#4a5568}
+.chk{width:22px;height:22px;cursor:pointer;accent-color:#4c51bf}
+.modal-ov{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-ov.active{display:flex;justify-content:center;align-items:flex-start}
+.modal{background:#fff;border-radius:14px;padding:20px;width:calc(100% - 24px);max-width:500px;margin:40px auto}
+.modal h2{display:flex;justify-content:space-between;align-items:center;font-size:1.1rem;margin-bottom:14px}
+.close-btn{background:none;font-size:1.4rem;color:#a0aec0;padding:4px 8px}
+.fg{margin-bottom:10px}.fg label{display:block;font-size:.78rem;font-weight:600;color:#4a5568;margin-bottom:3px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:.85rem;background:#fff;font-family:inherit}
+.fg textarea{resize:vertical;min-height:50px}
+.fr{display:flex;gap:10px}.fr .fg{flex:1}
+.cb-group{display:flex;gap:14px;flex-wrap:wrap}
+.cb-group label{display:flex;align-items:center;gap:5px;font-size:.85rem;cursor:pointer;font-weight:400}
+.qtpl{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.qtpl button{font-size:.72rem;padding:5px 10px}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.archive-sec{margin-top:12px}
+.archive-toggle{width:100%;text-align:left;padding:12px 16px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;font-weight:600;color:#4a5568;font-size:.88rem}
+.am-header{width:100%;text-align:left;padding:10px 14px;background:#edf2f7;border:none;border-radius:8px;font-weight:600;color:#4a5568;font-size:.83rem;margin-bottom:6px}
+.empty{text-align:center;padding:24px;color:#a0aec0;font-size:.88rem}
+.section-title{font-size:.92rem;font-weight:700;margin-bottom:8px;color:#2d3748}
+.hidden{display:none!important}
+.me-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;gap:8px}
+.settings-row{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.settings-row label{font-size:.82rem;font-weight:600;color:#4a5568;min-width:80px}
+.settings-row input{width:90px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:.85rem}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2d3748;color:#fff;padding:10px 20px;border-radius:10px;font-size:.85rem;z-index:2000;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.debug{font-size:.7rem;color:#a0aec0;margin-top:20px;text-align:center}
+@media(max-width:480px){
+.summary{gap:6px}.scard{padding:8px 4px}.scard .vl{font-size:1.1rem}.scard .lb{font-size:.6rem}
+.fr{flex-direction:column;gap:0}.modal{padding:16px;margin:20px auto}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🏖 Annual Leave Tracker <span id="dispYear">2025</span></h1>
+    <div class="sub">假期追蹤器 — 自動計算 AL 餘額</div>
+  </div>
+  <div class="summary">
+    <div class="scard c-total"><div class="lb">AL 總額</div><div class="vl" id="sumTotal">-</div></div>
+    <div class="scard c-used"><div class="lb">已用</div><div class="vl" id="sumUsed">-</div></div>
+    <div class="scard c-plan"><div class="lb">計劃中</div><div class="vl" id="sumPlan">-</div></div>
+    <div class="scard c-rem"><div class="lb">剩餘</div><div class="vl" id="sumRem">-</div></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn-p" onclick="openModal()">＋ 新增</button>
+    <button class="btn-s" onclick="openMonthEnd()">📦 月結</button>
+    <button class="btn-s" onclick="openSettings()">⚙ 設定</button>
+  </div>
+  <div class="filter-bar">
+    <select id="filterMonth" onchange="render()">
+      <option value="">全部月份</option>
+      <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option>
+      <option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+      <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option>
+      <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+    </select>
+    <select id="filterType" onchange="render()">
+      <option value="">全部類型</option>
+      <option value="AL">AL</option><option value="SI">SI</option><option value="Hours">Hours</option>
+    </select>
+    <select id="filterStatus" onchange="render()">
+      <option value="">全部狀態</option>
+      <option value="pending">⏳ 未完成</option>
+      <option value="done">✅ 已完成</option>
+    </select>
+    <select id="sortBy" onchange="render()">
+      <option value="date-asc">日期 ↑</option>
+      <option value="date-desc">日期 ↓</option>
+    </select>
+  </div>
+  <div class="section-title">📋 進行中 (<span id="activeCount">0</span>)</div>
+  <div class="card-list" id="activeList"></div>
+  <div class="archive-sec">
+    <button class="archive-toggle" id="archToggle" onclick="toggleArchive()">📂 已封存記錄 — 點擊展開</button>
+    <div id="archContent" class="hidden" style="margin-top:8px"></div>
+  </div>
+  <div class="debug" id="debugInfo"></div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-ov" id="entryModal">
+<div class="modal">
+  <h2><span id="modalTitle">新增記錄</span><button class="close-btn" onclick="closeModal('entryModal')">✕</button></h2>
+  <div style="font-size:.75rem;color:#718096;font-weight:600;margin-bottom:4px">⚡ 快速模板</div>
+  <div class="qtpl">
+    <button class="btn-s" onclick="applyTpl('dayoff_hours')">Day off (補時)</button>
+    <button class="btn-s" onclick="applyTpl('dayoff_al')">Day off (AL)</button>
+    <button class="btn-s" onclick="applyTpl('halfday_al')">Half day (AL)</button>
+    <button class="btn-s" onclick="applyTpl('sl')">Sick Leave</button>
+    <button class="btn-s" onclick="applyTpl('pmoff')">PM off</button>
+    <button class="btn-s" onclick="applyTpl('amoff')">AM off</button>
+  </div>
+  <input type="hidden" id="editId" value="">
+  <div class="fr">
+    <div class="fg"><label>假期類型</label>
+      <select id="fHoliday" onchange="document.getElementById('fHolidayCustomWrap').className=this.value==='other'?'fg':'fg hidden'">
+        <option value="">— 選擇 —</option>
+        <option value="Day off">Day off</option>
+        <option value="SL">SL</option>
+        <option value="PM off">PM off</option>
+        <option value="AM off">AM off</option>
+        <option value="AM off, PM SL">AM off, PM SL</option>
+        <option value="Off AM, SL PM">Off AM, SL PM</option>
+        <option value="PM SL">PM SL</option>
+        <option value="13:00 off">13:00 off</option>
+        <option value="13:30 off">13:30 off</option>
+        <option value="1230 off">1230 off</option>
+        <option value="other">其他 (自訂)</option>
+      </select>
+    </div>
+    <div class="fg"><label>日期</label><input type="date" id="fDate"></div>
+  </div>
+  <div class="fg hidden" id="fHolidayCustomWrap"><label>自訂假期類型</label><input type="text" id="fHolidayCustom" placeholder="輸入假期類型"></div>
+  <div class="fr">
+    <div class="fg"><label>天數/類別</label>
+      <select id="fDay">
+        <option value="1 Day">1 Day</option>
+        <option value="Half day">Half day</option>
+        <option value="SL">SL</option>
+        <option value="PM">PM</option>
+        <option value="hours">hours</option>
+      </select>
+    </div>
+    <div class="fg"><label>計劃用 AL</label><input type="number" id="fWillAL" step="0.5" min="0" value="0"></div>
+  </div>
+  <div class="fg"><label>備註</label><textarea id="fRemarks" placeholder="填寫備註..."></textarea></div>
+  <div class="fg"><label>類型 (可多選)</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="tHours"> Hours (補時)</label>
+      <label><input type="checkbox" id="tSI"> SI (病假)</label>
+      <label><input type="checkbox" id="tAL"> AL (年假)</label>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>已用 AL</label><input type="number" id="fUsedAL" step="0.5" min="0" value="0"></div>
+    <div class="fg"><label>狀態</label>
+      <select id="fStatus"><option value="false">⏳ 未完成</option><option value="true">✅ 已完成</option></select>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn-s" onclick="closeModal('entryModal')">取消</button>
+    <button class="btn-p" onclick="submitEntry()">💾 儲存</button>
+  </div>
+</div>
+</div>
+
+<!-- Month End Modal -->
+<div class="modal-ov" id="monthEndModal">
+<div class="modal">
+  <h2><span>📦 月結封存</span><button class="close-btn" onclick="closeModal('monthEndModal')">✕</button></h2>
+  <p style="font-size:.82rem;color:#718096;margin-bottom:14px">將已完成 ✅ 的記錄封存到「已封存記錄」。</p>
+  <div id="monthEndList"></div>
+  <div class="modal-foot"><button class="btn-s" onclick="closeModal('monthEndModal')">關閉</button></div>
+</div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-ov" id="settingsModal">
+<div class="modal">
+  <h2><span>⚙ 設定</span><button class="close-btn" onclick="closeModal('settingsModal')">✕</button></h2>
+  <div class="settings-row"><label>年份</label><input type="number" id="sYear" value="2025"></div>
+  <div class="settings-row"><label>AL 總額</label><input type="number" id="sTotal" step="0.5" value="17.5"></div>
+  <div class="settings-row"><label>帶到下年</label><input type="number" id="sBF" step="0.5" value="0.5"></div>
+  <hr style="margin:16px 0;border:none;border-top:1px solid #e2e8f0">
+  <div style="font-size:.85rem;font-weight:600;margin-bottom:8px">📤 資料備份</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <button class="btn-s" onclick="exportJSON()">匯出 JSON</button>
+    <button class="btn-s" onclick="document.getElementById('importFile').click()">匯入 JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+    <button class="btn-d" onclick="resetData()">🗑 重置</button>
+  </div>
+  <div class="modal-foot">
+    <button class="btn-s" onclick="closeModal('settingsModal')">取消</button>
+    <button class="btn-p" onclick="saveSettings()">💾 儲存設定</button>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== INITIAL DATA ===== */
+var INIT_ENTRIES=[
+{id:1,holiday:"AM off, PM SL",date:"2025-01-08",day:"SL",remarks:"Hep B vaccine pm SL到診紙 submitted, AM off used 4 hrs",willUseAL:0,usedAL:0,types:["Hours","SI"],status:true,archived:false},
+{id:2,holiday:"SL",date:"2025-01-16",day:"SL",remarks:"Fri, SL for m submitted",willUseAL:0,usedAL:0,types:["SI"],status:true,archived:false},
+{id:3,holiday:"Day off",date:"2025-01-21",day:"1 Day",remarks:"Pm off swapped w/ 19/1(Mon) AM off -0.5 day, use AL",willUseAL:0,usedAL:0.5,types:["AL"],status:true,archived:false},
+{id:4,holiday:"Day off",date:"2025-01-26",day:"1 Day",remarks:"Mon -0.5 day, use hours",willUseAL:0,usedAL:0,types:["Hours"],status:true,archived:false},
+{id:5,holiday:"Off AM, SL PM",date:"2025-02-04",day:"1 Day",remarks:"Am off use 0.5 AL, pm attendance cert submitted(dermatologist)",willUseAL:0,usedAL:0.5,types:["AL","SI"],status:true,archived:false},
+{id:6,holiday:"Day off",date:"2025-02-14",day:"1 Day",remarks:"Sat, use hours",willUseAL:0,usedAL:0,types:["Hours"],status:true,archived:false},
+{id:7,holiday:"Day off",date:"2025-02-16",day:"1 Day",remarks:"Pm off this wk changed to Am off (年30收早) no minus AL/hrs",willUseAL:0,usedAL:0,types:[],status:true,archived:false},
+{id:8,holiday:"Pm off",date:"2025-02-23",day:"PM",remarks:"Requested Mon pm off this wk",willUseAL:0,usedAL:0,types:[],status:true,archived:false},
+{id:9,holiday:"SL",date:"2025-02-24",day:"SL",remarks:"For m, SL tree health submitted",willUseAL:0,usedAL:0,types:["SI"],status:true,archived:false},
+{id:10,holiday:"Day off",date:"2025-03-04",day:"1 Day",remarks:"Am use hours, Pm SL for blood test, attendance cert submitted",willUseAL:0,usedAL:0,types:["Hours","SI"],status:true,archived:false},
+{id:11,holiday:"PM SL",date:"2025-03-13",day:"PM",remarks:"PM attendance cert breath test submitted",willUseAL:0,usedAL:0,types:["SI"],status:true,archived:false},
+{id:12,holiday:"Day off",date:"2025-03-18",day:"1 Day",remarks:"Mon pm off changed to 18/3 -0.5 day use hours",willUseAL:0,usedAL:0,types:["Hours"],status:true,archived:false},
+{id:13,holiday:"Day off",date:"2025-03-25",day:"1 Day",remarks:"Mon Pm off changed to 25/3, -0.5 day use hours",willUseAL:0,usedAL:0,types:["Hours"],status:true,archived:false},
+{id:14,holiday:"SL",date:"2025-04-16",day:"SL",remarks:"Gynae appt submitted",willUseAL:0,usedAL:0,types:["SI"],status:true,archived:false},
+{id:15,holiday:"SL",date:"2025-04-17",day:"SL",remarks:"Call Sick, GP SL Submitted",willUseAL:0,usedAL:0,types:["SI"],status:true,archived:false},
+{id:16,holiday:"Day off",date:"2025-04-22",day:"1 Day",remarks:"Pm off changed to wed, -0.5 AL",willUseAL:0,usedAL:0.5,types:["AL"],status:true,archived:false},
+{id:17,holiday:"13:30 off",date:"2025-04-25",day:"hours",remarks:"Sat, 13:30 leave (duty 0800-1300)",willUseAL:0,usedAL:0,types:[],status:true,archived:false},
+{id:18,holiday:"SL",date:"2025-04-30",day:"SL",remarks:"Plan SL for repeat Gynae appt, submitted",willUseAL:0,usedAL:0,types:["SI"],status:true,archived:false},
+{id:19,holiday:"13:00 off",date:"2025-05-02",day:"hours",remarks:"Sat, Duty 0830-1300 (dr lam holiday, no minus hours)",willUseAL:0,usedAL:0,types:["Hours"],status:true,archived:false},
+{id:20,holiday:"SL",date:"2025-05-04",day:"SL",remarks:"Am SL submitted, PM regular Monday off",willUseAL:0,usedAL:0,types:["SI"],status:true,archived:false},
+{id:21,holiday:"Day off",date:"2025-05-08",day:"1 Day",remarks:"Win birthday, use hours",willUseAL:0,usedAL:0,types:["Hours"],status:true,archived:false},
+{id:22,holiday:"Day off",date:"2025-05-16",day:"Half day",remarks:"Sat",willUseAL:0,usedAL:0.5,types:["AL"],status:true,archived:false},
+{id:23,holiday:"SL",date:"2025-05-20",day:"SL",remarks:"For m town health, submitted",willUseAL:0,usedAL:0,types:["SI"],status:true,archived:false},
+{id:24,holiday:"1230 off",date:"2025-05-23",day:"hours",remarks:"Use 0.5 hours (0800-1300 duty)",willUseAL:0,usedAL:0,types:["Hours"],status:false,archived:false},
+{id:25,holiday:"Day off",date:"2025-05-28",day:"1 Day",remarks:"-0.5 AL, pm off changed to thur",willUseAL:0.5,usedAL:0,types:["AL"],status:false,archived:false},
+{id:26,holiday:"Day off",date:"2025-06-01",day:"Half day",remarks:"(Mon pm off) use 4 hours",willUseAL:0,usedAL:0,types:["Hours"],status:false,archived:false},
+{id:27,holiday:"Day off",date:"2025-06-06",day:"Half day",remarks:"Sat, use 0.5 AL",willUseAL:0.5,usedAL:0,types:["AL"],status:false,archived:false},
+{id:28,holiday:"SL",date:"2025-06-09",day:"SL",remarks:"AM SL for BT, Pm off will change from mon to tue??",willUseAL:0,usedAL:0,types:["SI"],status:false,archived:false}
+];
+
+var INIT_SETTINGS={year:2025,alTotal:17.5,bringForward:0.5};
+var state=null;
+var archiveOpen=false;
+var canStore=false;
+
+/* ===== STORAGE ===== */
+function checkStorage(){try{localStorage.setItem('__t','1');localStorage.removeItem('__t');canStore=true}catch(e){canStore=false}}
+function save(){if(!canStore)return;try{localStorage.setItem('alt',JSON.stringify(state))}catch(e){}}
+function load(){
+  checkStorage();
+  if(canStore){try{var d=localStorage.getItem('alt');if(d){var p=JSON.parse(d);if(p&&p.settings&&p.entries){state=p;return}}}catch(e){}}
+  state={settings:JSON.parse(JSON.stringify(INIT_SETTINGS)),entries:JSON.parse(JSON.stringify(INIT_ENTRIES))};
+}
+
+/* ===== HELPERS ===== */
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+var MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function fmtDate(ds){if(!ds)return'';var p=ds.split('-');return MN[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)}
+function fmtDateFull(ds){if(!ds)return'';var d=new Date(ds+'T00:00:00');return DN[d.getDay()]+' '+MN[d.getMonth()]+' '+d.getDate()}
+function dayBadge(d){if(!d)return'';var l=d.toLowerCase(),c='b-hr';if(l==='sl')c='b-sl';else if(l==='1 day')c='b-1day';else if(l.indexOf('half')>=0)c='b-half';else if(l==='pm')c='b-pm';return'<span class="badge '+c+'">'+esc(d)+'</span>'}
+function typeBadges(t){if(!t||!t.length)return'<span style="color:#ccc">—</span>';var h='';for(var i=0;i<t.length;i++){var c='b-hr';if(t[i]==='SI')c='b-si';else if(t[i]==='AL')c='b-al';else if(t[i]==='Hours')c='b-hours';h+='<span class="badge '+c+'">'+t[i]+'</span> '}return h}
+function nextId(){var m=0;for(var i=0;i<state.entries.length;i++)if(state.entries[i].id>m)m=state.entries[i].id;return m+1}
+function findEntry(id){for(var i=0;i<state.entries.length;i++)if(state.entries[i].id===id)return state.entries[i];return null}
+
+/* ===== CALC ===== */
+function calcSummary(){var s=state.settings,u=0,p=0;for(var i=0;i<state.entries.length;i++){var e=state.entries[i];if(e.status&&e.usedAL)u+=e.usedAL;if(!e.status&&e.willUseAL)p+=e.willUseAL}return{total:s.alTotal,used:u,planned:p,remaining:s.alTotal-u}}
+
+/* ===== RENDER ===== */
+function render(){try{renderSummary()}catch(e){}try{renderActive()}catch(e){}try{renderArchived()}catch(e){}try{renderDebug()}catch(e){}}
+function renderSummary(){var c=calcSummary();document.getElementById('sumTotal').textContent=c.total;document.getElementById('sumUsed').textContent=c.used;document.getElementById('sumPlan').textContent=c.planned;document.getElementById('sumRem').textContent=c.remaining;document.getElementById('dispYear').textContent=state.settings.year}
+function renderDebug(){document.getElementById('debugInfo').textContent='共 '+state.entries.length+' 筆 | 儲存: '+(canStore?'✓ localStorage':'✗ 僅暫存，請匯出備份')}
+
+function getFilteredActive(){
+  var list=[];for(var i=0;i<state.entries.length;i++)if(!state.entries[i].archived)list.push(state.entries[i]);
+  var fm=document.getElementById('filterMonth').value;
+  var ft=document.getElementById('filterType').value;
+  var fs=document.getElementById('filterStatus').value;
+  if(fm){var f=[];for(var i=0;i<list.length;i++)if(list[i].date&&list[i].date.substring(5,7)===fm)f.push(list[i]);list=f}
+  if(ft){var f=[];for(var i=0;i<list.length;i++)if(list[i].types&&list[i].types.indexOf(ft)>=0)f.push(list[i]);list=f}
+  if(fs==='done'){var f=[];for(var i=0;i<list.length;i++)if(list[i].status)f.push(list[i]);list=f}
+  else if(fs==='pending'){var f=[];for(var i=0;i<list.length;i++)if(!list[i].status)f.push(list[i]);list=f}
+  var sb=document.getElementById('sortBy').value;
+  list.sort(function(a,b){var da=a.date||'',db=b.date||'';return sb==='date-desc'?db.localeCompare(da):da.localeCompare(db)});
+  return list;
+}
+
+function renderActive(){
+  var el=document.getElementById('activeList');
+  var list=getFilteredActive();
+  document.getElementById('activeCount').textContent=list.length;
+  if(!list.length){el.innerHTML='<div class="empty">沒有符合條件的記錄</div>';return}
+  var h='';
+  for(var i=0;i<list.length;i++){
+    var e=list[i];
+    var sc=e.status?'done':'pending';
+    var ai='';
+    if(e.willUseAL>0)ai+='計劃AL:'+e.willUseAL+' ';
+    if(e.usedAL>0)ai+='已用AL:'+e.usedAL;
+    h+='<div class="entry-card '+sc+'">'
+      +'<div class="ec-top"><div class="ec-holiday">'+esc(e.holiday)+'</div><div class="ec-date">'+fmtDateFull(e.date)+'</div></div>'
+      +'<div style="margin:4px 0">'+dayBadge(e.day)+'</div>'
+      +(e.remarks?'<div class="ec-remarks">'+esc(e.remarks)+'</div>':'')
+      +'<div class="ec-meta">'
+      +'<div class="ec-types">'+typeBadges(e.types)+(ai?' <span class="ec-al-info">'+ai+'</span>':'')+'</div>'
+      +'<div class="ec-actions">'
+      +'<input type="checkbox" class="chk" '+(e.status?'checked':'')+' onchange="toggleStatus('+e.id+')" title="完成扣假">'
+      +'<button class="btn-s" onclick="openModal('+e.id+')">✏️</button>'
+      +'<button class="btn-d" onclick="deleteEntry('+e.id+')">🗑</button>'
+      +'</div></div></div>';
+  }
+  el.innerHTML=h;
+}
+
+function renderArchived(){
+  var archived=[];for(var i=0;i<state.entries.length;i++)if(state.entries[i].archived)archived.push(state.entries[i]);
+  var tg=document.getElementById('archToggle');
+  tg.textContent='📂 已封存記錄 ('+archived.length+' 筆) — 點擊'+(archiveOpen?'收起':'展開');
+  var ct=document.getElementById('archContent');
+  if(!archiveOpen){ct.className='hidden';return}ct.className='';
+  if(!archived.length){ct.innerHTML='<div class="empty">沒有封存記錄</div>';return}
+  var groups={};for(var i=0;i<archived.length;i++){var e=archived[i],m=e.date?e.date.substring(0,7):'unknown';if(!groups[m])groups[m]=[];groups[m].push(e)}
+  var months=Object.keys(groups).sort();
+  var mN={'01':'1月','02':'2月','03':'3月','04':'4月','05':'5月','06':'6月','07':'7月','08':'8月','09':'9月','10':'10月','11':'11月','12':'12月'};
+  var h='';
+  for(var mi=0;mi<months.length;mi++){
+    var m=months[mi],mm=m.substring(5,7),entries=groups[m];
+    h+='<div style="margin-bottom:8px"><button class="am-header" onclick="this.nextElementSibling.classList.toggle(\'hidden\')">📁 '+state.settings.year+' '+(mN[mm]||mm)+' ('+entries.length+' 筆)</button><div class="card-list hidden">';
+    for(var j=0;j<entries.length;j++){
+      var e=entries[j];
+      h+='<div class="entry-card done"><div class="ec-top"><div class="ec-holiday">'+esc(e.holiday)+'</div><div class="ec-date">'+fmtDate(e.date)+'</div></div>'
+        +'<div style="margin:4px 0">'+dayBadge(e.day)+'</div>'
+        +(e.remarks?'<div class="ec-remarks">'+esc(e.remarks)+'</div>':'')
+        +'<div class="ec-meta"><div class="ec-types">'+typeBadges(e.types)+(e.usedAL?' <span class="ec-al-info">已用AL:'+e.usedAL+'</span>':'')+'</div>'
+        +'<button class="btn-s" onclick="unarchive('+e.id+')" style="font-size:.72rem">↩ 還原</button></div></div>';
+    }
+    h+='</div></div>';
+  }
+  ct.innerHTML=h;
+}
+
+/* ===== MODAL ===== */
+function openModal(editId){
+  var modal=document.getElementById('entryModal');
+  document.getElementById('editId').value='';
+  document.getElementById('fHolidayCustomWrap').className='fg hidden';
+  if(editId){
+    var e=findEntry(editId);if(!e)return;
+    document.getElementById('modalTitle').textContent='編輯記錄';
+    document.getElementById('editId').value=editId;
+    var hSel=document.getElementById('fHoliday'),found=false;
+    for(var i=0;i<hSel.options.length;i++){if(hSel.options[i].value===e.holiday){hSel.selectedIndex=i;found=true;break}}
+    if(!found){hSel.value='other';document.getElementById('fHolidayCustomWrap').className='fg';document.getElementById('fHolidayCustom').value=e.holiday}
+    document.getElementById('fDate').value=e.date||'';
+    document.getElementById('fDay').value=e.day||'1 Day';
+    document.getElementById('fRemarks').value=e.remarks||'';
+    document.getElementById('fWillAL').value=e.willUseAL||0;
+    document.getElementById('fUsedAL').value=e.usedAL||0;
+    document.getElementById('fStatus').value=e.status?'true':'false';
+    document.getElementById('tHours').checked=e.types&&e.types.indexOf('Hours')>=0;
+    document.getElementById('tSI').checked=e.types&&e.types.indexOf('SI')>=0;
+    document.getElementById('tAL').checked=e.types&&e.types.indexOf('AL')>=0;
+  }else{
+    document.getElementById('modalTitle').textContent='新增記錄';
+    document.getElementById('fHoliday').selectedIndex=0;
+    document.getElementById('fDate').value='';document.getElementById('fDay').value='1 Day';
+    document.getElementById('fRemarks').value='';document.getElementById('fWillAL').value=0;
+    document.getElementById('fUsedAL').value=0;document.getElementById('fStatus').value='false';
+    document.getElementById('tHours').checked=false;document.getElementById('tSI').checked=false;document.getElementById('tAL').checked=false;
+  }
+  modal.className='modal-ov active';
+}
+
+function submitEntry(){
+  var editId=document.getElementById('editId').value;
+  var holiday=document.getElementById('fHoliday').value;
+  if(holiday==='other')holiday=document.getElementById('fHolidayCustom').value.trim();
+  if(!holiday){showToast('⚠ 請選擇假期類型');return}
+  var date=document.getElementById('fDate').value;
+  if(!date){showToast('⚠ 請選擇日期');return}
+  var types=[];
+  if(document.getElementById('tHours').checked)types.push('Hours');
+  if(document.getElementById('tSI').checked)types.push('SI');
+  if(document.getElementById('tAL').checked)types.push('AL');
+  var data={holiday:holiday,date:date,day:document.getElementById('fDay').value,remarks:document.getElementById('fRemarks').value.trim(),willUseAL:parseFloat(document.getElementById('fWillAL').value)||0,usedAL:parseFloat(document.getElementById('fUsedAL').value)||0,types:types,status:document.getElementById('fStatus').value==='true'};
+  if(editId){
+    var e=findEntry(parseInt(editId));
+    if(e){e.holiday=data.holiday;e.date=data.date;e.day=data.day;e.remarks=data.remarks;e.willUseAL=data.willUseAL;e.usedAL=data.usedAL;e.types=data.types;e.status=data.status}
+    showToast('已更新 ✓');
+  }else{
+    data.id=nextId();data.archived=false;
+    state.entries.push(data);
+    showToast('已新增 ✓');
+  }
+  save();render();closeModal('entryModal');
+}
+
+function deleteEntry(id){if(!confirm('確定刪除？'))return;var n=[];for(var i=0;i<state.entries.length;i++)if(state.entries[i].id!==id)n.push(state.entries[i]);state.entries=n;save();render();showToast('已刪除')}
+
+function toggleStatus(id){
+  var e=findEntry(id);if(!e)return;
+  e.status=!e.status;
+  if(e.status&&e.willUseAL>0&&e.usedAL===0){e.usedAL=e.willUseAL;showToast('已完成，自動填入已用AL: '+e.usedAL)}
+  else if(!e.status&&e.usedAL>0&&e.willUseAL>0){e.usedAL=0;showToast('已取消完成')}
+  else{showToast(e.status?'已標記完成 ✓':'已取消')}
+  save();render();
+}
+
+/* ===== TEMPLATES ===== */
+var TPLS={
+  dayoff_hours:{holiday:'Day off',day:'1 Day',types:['Hours'],willUseAL:0},
+  dayoff_al:{holiday:'Day off',day:'1 Day',types:['AL'],willUseAL:0.5},
+  halfday_al:{holiday:'Day off',day:'Half day',types:['AL'],willUseAL:0.5},
+  sl:{holiday:'SL',day:'SL',types:['SI'],willUseAL:0},
+  pmoff:{holiday:'PM off',day:'PM',types:['Hours'],willUseAL:0},
+  amoff:{holiday:'AM off',day:'1 Day',types:['Hours'],willUseAL:0}
+};
+function applyTpl(name){
+  var t=TPLS[name];if(!t)return;
+  var hSel=document.getElementById('fHoliday');
+  for(var i=0;i<hSel.options.length;i++)if(hSel.options[i].value===t.holiday){hSel.selectedIndex=i;break}
+  document.getElementById('fHolidayCustomWrap').className='fg hidden';
+  document.getElementById('fDay').value=t.day;
+  document.getElementById('fWillAL').value=t.willUseAL;
+  document.getElementById('tHours').checked=t.types.indexOf('Hours')>=0;
+  document.getElementById('tSI').checked=t.types.indexOf('SI')>=0;
+  document.getElementById('tAL').checked=t.types.indexOf('AL')>=0;
+  document.getElementById('fDate').focus();
+  showToast('已套用模板');
+}
+
+/* ===== MONTH END ===== */
+function openMonthEnd(){
+  var list=document.getElementById('monthEndList');
+  var mm={};
+  for(var i=0;i<state.entries.length;i++){var e=state.entries[i];if(e.archived||!e.date)continue;var m=e.date.substring(0,7);if(!mm[m])mm[m]={done:0,pending:0};if(e.status)mm[m].done++;else mm[m].pending++}
+  var months=Object.keys(mm).sort();
+  var mN=['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  if(!months.length){list.innerHTML='<div class="empty">沒有可封存的月份</div>'}
+  else{
+    var h='';
+    for(var i=0;i<months.length;i++){
+      var m=months[i],mi=parseInt(m.substring(5,7),10),info=mm[m],total=info.done+info.pending;
+      h+='<div class="me-item"><div><strong>'+mN[mi]+'</strong> <span style="font-size:.78rem;color:#718096">✅'+info.done+'/'+total+'</span>'
+        +(info.pending>0?' <span style="font-size:.78rem;color:#ed8936">⏳'+info.pending+'</span>':'')
+        +'</div><button class="'+(info.pending===0?'btn-g':'btn-w')+'" onclick="archiveMonth(\''+m+'\')"'+(info.done===0?' disabled':'')+'>📦 封存</button></div>';
+    }
+    list.innerHTML=h;
+  }
+  document.getElementById('monthEndModal').className='modal-ov active';
+}
+function archiveMonth(month){var c=0;for(var i=0;i<state.entries.length;i++){var e=state.entries[i];if(!e.archived&&e.status&&e.date&&e.date.indexOf(month)===0){e.archived=true;c++}}save();render();showToast('已封存 '+c+' 筆');openMonthEnd()}
+function unarchive(id){var e=findEntry(id);if(e){e.archived=false;save();render();showToast('已還原')}}
+function toggleArchive(){archiveOpen=!archiveOpen;renderArchived()}
+
+/* ===== SETTINGS ===== */
+function openSettings(){document.getElementById('sYear').value=state.settings.year;document.getElementById('sTotal').value=state.settings.alTotal;document.getElementById('sBF').value=state.settings.bringForward;document.getElementById('settingsModal').className='modal-ov active'}
+function saveSettings(){state.settings.year=parseInt(document.getElementById('sYear').value)||2025;state.settings.alTotal=parseFloat(document.getElementById('sTotal').value)||17.5;state.settings.bringForward=parseFloat(document.getElementById('sBF').value)||0;save();render();closeModal('settingsModal');showToast('設定已儲存 ✓')}
+
+/* ===== EXPORT/IMPORT ===== */
+function exportJSON(){var j=JSON.stringify(state,null,2);var b=new Blob([j],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='al-tracker-'+state.settings.year+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);showToast('已匯出')}
+function importJSON(event){var file=event.target.files[0];if(!file)return;var r=new FileReader();r.onload=function(ev){try{var imp=JSON.parse(ev.target.result);if(imp.settings&&imp.entries){if(confirm('匯入 '+imp.entries.length+' 筆？將覆蓋現有資料。')){state=imp;save();render();showToast('匯入成功 ✓');closeModal('settingsModal')}}else{showToast('⚠ 格式不正確')}}catch(e){showToast('⚠ 無法解析')}};r.readAsText(file);event.target.value=''}
+function resetData(){if(!confirm('確定重置？'))return;state={settings:JSON.parse(JSON.stringify(INIT_SETTINGS)),entries:JSON.parse(JSON.stringify(INIT_ENTRIES))};save();render();closeModal('settingsModal');showToast('已重置')}
+
+/* ===== UTILS ===== */
+function closeModal(id){document.getElementById(id).className='modal-ov'}
+document.addEventListener('click',function(e){if(e.target.className&&e.target.className.indexOf&&e.target.className.indexOf('modal-ov')>=0)e.target.className='modal-ov'});
+var toastTimer=null;
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.className='toast'},2000)}
+
+/* ===== INIT ===== */
+load();render();
+</script>
+</body>
+</html>
